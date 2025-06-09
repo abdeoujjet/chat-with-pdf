@@ -1,0 +1,87 @@
+from config import PDF_FILENAME, SERVER_PORT
+
+html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF Viewer & Chatbot</title>
+<style>
+  body, html {{
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+  }}
+  .container {{
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }}
+  .left-pane {{
+    flex: 1;
+    border-right: 2px solid #ddd;
+    display: flex;
+    flex-direction: column;
+  }}
+  .left-pane header {{
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px;
+    font-size: 1.2rem;
+  }}
+  .pdf-viewer {{
+    flex-grow: 1;
+    width: 100%;
+    border: none;
+  }}
+  .right-pane {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }}
+  .right-pane header {{
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px;
+    font-size: 1.2rem;
+  }}
+  iframe.chat-iframe {{
+    flex-grow: 1;
+    border: none;
+    width: 100%;
+  }}
+  @media (max-width: 800px) {{
+    .container {{
+      flex-direction: column;
+    }}
+    .left-pane, .right-pane {{
+      flex: unset;
+      height: 50vh;
+    }}
+  }}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="left-pane">
+    <header>PDF Document</header>
+    <iframe class="pdf-viewer" src="{PDF_FILENAME}"></iframe>
+  </div>
+
+  <div class="right-pane">
+    <header>Chat with the Document</header>
+    <iframe class="chat-iframe" src="http://localhost:{SERVER_PORT}/"></iframe>
+  </div>
+
+</div>
+
+</body>
+</html>
+"""
+
+# Escribe el HTML
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"✅ HTML generado correctamente con PDF='{PDF_FILENAME}' y puerto={SERVER_PORT}")
