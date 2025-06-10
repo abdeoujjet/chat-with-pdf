@@ -1,4 +1,11 @@
 # environments 
 env
-# *.ipynb
+
+# py files
+*.ipynb
+
+# other
+__pycache__
 ChatVectors
+vectorstores
+flagged
