@@ -10,4 +10,6 @@ ChatVectors
 vectorstores
 flagged
 pdfs/*
+
+# keep folder
 !.gitkeep

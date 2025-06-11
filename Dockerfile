@@ -1,27 +1,28 @@
 FROM python:3.10-slim
 
-# Evitar prompts de Debian
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar dependencias del sistema
+# install dependencies 
 RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear directorio del app
+# create working directory
 WORKDIR /app
 
-# Copiar requirements y archivos
+# Copy requirements file
 COPY requirements.txt ./
 COPY . .
 
-# Instalar dependencias
+# Install requirements.txt
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Descargar modelo HuggingFace para sentence-transformers
+# download HuggingFace  sentence-transformers
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
-# Puerto por defecto de Gradio
+RUN python generate_index_html.py
+
+# Expose Gradio default port (7860)
 EXPOSE 7860
 
 CMD ["python", "app.py"]

@@ -77,7 +77,7 @@ def chatbot_interface(message, history, request: gr.Request):
     retriever = load_retriever_for_pdf(pdf_name)
     llm = ChatOllama(model=MODEL)
 
-    # 2. Convert Gradio's history (list of lists) to LangChain's ChatMessageHistory
+    # 2. Gradio history (list of lists) to LangChain ChatMessageHistory
     message_history = ChatMessageHistory()
     for user_msg, ai_msg in history:
         message_history.add_user_message(user_msg)
@@ -96,12 +96,10 @@ def chatbot_interface(message, history, request: gr.Request):
         memory=memory
     )
 
-    # 4. Get the answer from the chain
+    # 4. Get answer
     result = conversation_chain.invoke({"question": message})
     answer = result["answer"]
 
-    # 5. Return only the string response.
-    # gr.ChatInterface handles history management in the UI automatically.
     return answer
 
 def launch_chat():
