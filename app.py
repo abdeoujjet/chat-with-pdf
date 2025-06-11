@@ -99,7 +99,6 @@ def chatbot_interface(message, history, request: gr.Request):
     # 4. Get answer
     result = conversation_chain.invoke({"question": message})
     answer = result["answer"]
-
     return answer
 
 def launch_chat():
