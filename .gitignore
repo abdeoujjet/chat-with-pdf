@@ -1,4 +1,16 @@
 # environments 
 env
-# *.ipynb
+
+# py files
+*.ipynb
+main.py
+
+# other
+__pycache__
 ChatVectors
+vectorstores
+flagged
+pdfs/*
+
+# keep folder
+!.gitkeep
