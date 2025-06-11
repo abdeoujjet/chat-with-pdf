@@ -1,7 +1,6 @@
 # 📄 PDF Chatbot with Gradio + LangChain + Ollama + Chroma
-This project is designed to store and maintain history between chats and PDFs, enabling users to keep contextual continuity when interacting with documents.
 
-This project lets you **chat with PDF documents** using a local model (`gemma3:4b` via Ollama), embeddings from `sentence-transformers`, vector storage via ChromaDB, and a web interface built with Gradio. It features a split-screen view: the PDF on the left, the chatbot on the right.
+This project lets you **chat with PDF documents** using a local model (`gemma3:4b` via Ollama), embeddings from `sentence-transformers`, vector storage via ChromaDB, and a web interface built with Gradio. It features a split-screen view: the PDF on the left, the chatbot on the right. Is designed to store and maintain history between chats and PDFs, enabling users to keep contextual continuity.
 
 ---
 
