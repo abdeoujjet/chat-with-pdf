@@ -1,4 +1,11 @@
-from config import PDF_FILENAME, SERVER_PORT
+import os
+from config import PDF_FOLDER, SERVER_PORT
+
+# Obtener lista de PDFs
+pdf_files = [f for f in os.listdir(PDF_FOLDER) if f.endswith(".pdf")]
+
+# HTML con selector de PDF
+options_html = "\n".join([f'<option value="{PDF_FOLDER}/{file}">{file}</option>' for file in pdf_files])
 
 html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -27,6 +34,9 @@ html_content = f"""<!DOCTYPE html>
     color: white;
     padding: 10px;
     font-size: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }}
   .pdf-viewer {{
     flex-grow: 1;
@@ -49,6 +59,11 @@ html_content = f"""<!DOCTYPE html>
     border: none;
     width: 100%;
   }}
+  select {{
+    font-size: 1rem;
+    padding: 5px;
+    margin-left: 10px;
+  }}
   @media (max-width: 800px) {{
     .container {{
       flex-direction: column;
@@ -59,14 +74,35 @@ html_content = f"""<!DOCTYPE html>
     }}
   }}
 </style>
+<script>
+  function changePDF(select) {{
+    const pdfViewer = document.getElementById("pdfViewer");
+    pdfViewer.src = select.value;
+    localStorage.setItem("lastPDF", select.value);
+  }}
+
+  window.onload = function() {{
+    const lastPDF = localStorage.getItem("lastPDF");
+    const select = document.getElementById("pdfSelect");
+    if (lastPDF) {{
+      select.value = lastPDF;
+      document.getElementById("pdfViewer").src = lastPDF;
+    }}
+  }};
+</script>
 </head>
 <body>
 
 <div class="container">
 
   <div class="left-pane">
-    <header>PDF Document</header>
-    <iframe class="pdf-viewer" src="{PDF_FILENAME}"></iframe>
+    <header>
+      PDF Document
+      <select id="pdfSelect" onchange="changePDF(this)">
+        {options_html}
+      </select>
+    </header>
+    <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
   </div>
 
   <div class="right-pane">
@@ -80,8 +116,8 @@ html_content = f"""<!DOCTYPE html>
 </html>
 """
 
-# Escribe el HTML
+# Guardar el HTML
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print(f"✅ HTML generado correctamente con PDF='{PDF_FILENAME}' y puerto={SERVER_PORT}")
+print(f"✅ HTML generado correctamente con selector de PDFs y puerto={SERVER_PORT}")

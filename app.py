@@ -1,15 +1,12 @@
 import os
-from urllib.parse import urlparse, parse_qs
-
 import gradio as gr
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
-from langchain.memory.chat_message_histories import ChatMessageHistory
-from langchain.schema.messages import AIMessage, HumanMessage
 from langchain_community.chat_models import ChatOllama
+from langchain.memory.chat_message_histories import ChatMessageHistory
 from langchain_chroma import Chroma
 
 PDF_FOLDER = "./pdfs"
@@ -20,7 +17,7 @@ retriever_cache = {}
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def cargar_pdf_texto(pdf_path):
-    import fitz  # PyMuPDF
+    import fitz
     texto_completo = ""
     doc = fitz.open(pdf_path)
     for pagina in doc:
@@ -52,70 +49,81 @@ def load_retriever_for_pdf(pdf_name):
     retriever_cache[pdf_name] = retriever
     return retriever
 
+# Estado global
+current_pdf = None
+current_chain = None
 
-def chatbot_interface(message, history, request: gr.Request):
-    """
-    Processes a user message, interacts with the RAG chain, and returns the AI's response.
+def setup_chain(pdf_name):
+    global current_pdf, current_chain
+    
+    if current_pdf != pdf_name:
+        print(f"🔄 Cambiando a: {pdf_name}")
+        
+        retriever = load_retriever_for_pdf(pdf_name)
+        llm = ChatOllama(model=MODEL)
+        
+        memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            return_messages=True,
+            output_key="answer"
+        )
+        
+        current_chain = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            retriever=retriever,
+            memory=memory,
+            return_source_documents=False
+        )
+        
+        current_pdf = pdf_name
+        print(f"✅ Configurado para: {pdf_name}")
 
-    Args:
-        message (str): The user's input message.
-        history (list[list[str, str]]): The conversation history in Gradio's format.
-        request (gr.Request): The Gradio request object to access HTTP headers.
 
-    Returns:
-        str: The AI's response message.
-    """
+
+def chat_function(message, history):
+    """Función de chat ultra simple"""
+    if not history or not isinstance(history, list):
+        history = []
+
     if not message:
-        return ""
+        return history, ""
+    
+    pdf_name = "Produccion_Nuevo_Gemelo.pdf"
+    setup_chain(pdf_name)
 
-    # 1. Get PDF name from the request URL
-    referer = request.headers.get("referer", "")
-    parsed = urlparse(referer)
-    query_params = parse_qs(parsed.query)
-    pdf_name = query_params.get("pdf", ["Produccion_Nuevo_Gemelo.pdf"])[0]
+    try:
+        result = current_chain({"question": message})
+        response = result["answer"]
+        history.append([message, response])
+        return history, ""
+    except Exception as e:
+        error_msg = f"Error: {str(e)}"
+        history.append([message, error_msg])
+        return history, ""
 
-    retriever = load_retriever_for_pdf(pdf_name)
-    llm = ChatOllama(model=MODEL)
 
-    # 2. Convert Gradio's history (list of lists) to LangChain's ChatMessageHistory
-    message_history = ChatMessageHistory()
-    for user_msg, ai_msg in history:
-        message_history.add_user_message(user_msg)
-        message_history.add_ai_message(ai_msg)
+# Interface usando solo gr.Interface (más simple que gr.Blocks)
+def launch_simple():
+    print("✅ Lanzando versión ultra-simple...")
+    
+    iface = gr.Interface(
+        fn=lambda msg, hist: chat_function(msg, hist),
+        inputs=[
+            gr.Textbox(placeholder="Escribe tu pregunta..."),
+            gr.State(value=[])
+        ],
+        # outputs=gr.Chatbot(),
+        outputs=[
+            gr.Chatbot(),
+            gr.State()
+        ],
 
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        chat_memory=message_history,
-        return_messages=True,
+        title="Chat con PDF - Versión Simple",
+        description="Haz preguntas sobre el PDF"
     )
-
-    # 3. Create the conversational chain
-    conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=retriever,
-        memory=memory
-    )
-
-    # 4. Get the answer from the chain
-    result = conversation_chain.invoke({"question": message})
-    answer = result["answer"]
-
-    # 5. Return only the string response.
-    # gr.ChatInterface handles history management in the UI automatically.
-    return answer
-
-def launch_chat():
-    """Launches the Gradio Chat Interface."""
-    print("🚀 Server started at http://localhost:7860")
-    demo = gr.ChatInterface(
-        fn=chatbot_interface,
-        # No additional_inputs needed for gr.Request
-        title="Chat with your PDF",
-        description="Select a PDF and start chatting."
-    )
-    demo.launch(server_port=7860, share=False)
-
-
+    
+    # iface.launch(server_name="127.0.0.1", server_port=7860)
+    iface.launch(server_name="0.0.0.0", server_port=7860, share=True)
 
 if __name__ == "__main__":
-    launch_chat()
+    launch_simple()

@@ -11,3 +11,5 @@ vectorstores
 flagged
 pdfs/*
 !.gitkeep
+
+pdfs

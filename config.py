@@ -1,3 +1,4 @@
 # config.py
-PDF_FILENAME = "pdf\Produccion_Nuevo_Gemelo.pdf"
+PDF_FOLDER = "pdfs"
+PDF_FILENAME = "pdfs\Produccion_Nuevo_Gemelo.pdf"
 SERVER_PORT = 7860
