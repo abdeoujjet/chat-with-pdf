@@ -11,3 +11,4 @@ vectorstores
 flagged
 /static/pdfs/*.pdf
 !/static/pdfs/.gitkeep
+generate_index_html.py
