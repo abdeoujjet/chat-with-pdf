@@ -9,7 +9,5 @@ __pycache__
 ChatVectors
 vectorstores
 flagged
-pdfs/*
-!.gitkeep
-
-pdfs
+/static/pdfs/*.pdf
+!/static/pdfs/.gitkeep

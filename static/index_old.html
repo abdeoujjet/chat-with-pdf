@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF Viewer & AI Chatbot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .left-pane, .right-pane {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .left-pane {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .right-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1;
+    position: relative;
+  }
+  
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  
+  .pdf-viewer {
+    flex-grow: 1;
+    width: 100%;
+    border: none;
+    background: #f8fafc;
+  }
+  
+  .pdf-selector {
+    z-index: 1;
+    position: relative;
+  }
+  
+  select {
+    font-size: 1rem;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: #1e293b;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+  }
+  
+  select:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  }
+  
+  .chat-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    gap: 20px;
+  }
+  
+  .chat-messages {
+    flex-grow: 1;
+    background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    overflow-y: auto;
+    min-height: 200px;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .chat-input-container {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .chat-input {
+    flex-grow: 1;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  .chat-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .chat-button {
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .chat-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  .chat-button:active {
+    transform: translateY(-1px);
+  }
+  
+  .message {
+    margin-bottom: 16px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+  }
+  
+  .user-message {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-left: 40px;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .bot-message {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #1e293b;
+    margin-right: 40px;
+    border-bottom-left-radius: 4px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+  }
+  
+  .message-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+  
+  .message-content {
+    line-height: 1.6;
+  }
+  
+  .loading-indicator {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-style: italic;
+    padding: 16px 20px;
+  }
+  
+  .loading-dots {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: #667eea;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite;
+  }
+  
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  
+  .no-pdf-message {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 40px;
+    background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+    border-radius: 16px;
+    margin: 20px;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  @media (max-width: 800px) {
+    .container {
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+    }
+    .left-pane, .right-pane {
+      flex: unset;
+      height: 45vh;
+    }
+    .header {
+      padding: 15px;
+      font-size: 1.2rem;
+    }
+    .chat-container {
+      padding: 20px;
+    }
+    .user-message {
+      margin-left: 20px;
+    }
+    .bot-message {
+      margin-right: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="left-pane">
+    <div class="header">
+      <div class="header-content">
+        <div class="header-icon">📄</div>
+        <span>PDF Document</span>
+      </div>
+      <div class="pdf-selector">
+        <select id="pdfSelect" onchange="changePDF(this)">
+          <option value="">Select a PDF file</option>
+        </select>
+      </div>
+    </div>
+    <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
+  </div>
+  
+  <div class="right-pane">
+    <div class="header">
+      <div class="header-content">
+        <div class="header-icon">🤖</div>
+        <span>AI Document Assistant</span>
+      </div>
+    </div>
+    <div class="chat-container">
+      <div id="chatMessages" class="chat-messages">
+        <div class="message bot-message">
+          <div class="message-label">AI Assistant</div>
+          <div class="message-content">
+            Hello! Welcome to the PDF Document Assistant. Please select a PDF file from the dropdown menu on the left to get started. Once loaded, I'll be able to help you with questions about the document.
+          </div>
+        </div>
+      </div>
+      <div class="loading-indicator" id="loadingIndicator">
+        <span>AI is thinking</span>
+        <div class="loading-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <input 
+          type="text" 
+          id="chatInput" 
+          class="chat-input" 
+          placeholder="Ask me anything about the PDF document..."
+          onkeypress="handleKeyPress(event)"
+          disabled
+        />
+        <button class="chat-button" onclick="sendMessage()" id="sendButton" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentPDF = '';
+let chatHistory = [];
+let isLoading = false;
+
+// Load PDFs from backend API
+async function loadPDFList() {
+  try {
+    const select = document.getElementById('pdfSelect');
+    
+    // Fetch PDF list from backend
+    const response = await fetch('http://localhost:7860/list_pdfs');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const pdfFiles = data.pdfs || [];
+    
+    if (pdfFiles.length > 0) {
+      // Clear existing options
+      select.innerHTML = '<option value="">Select a PDF file</option>';
+      
+      // Add new options
+      pdfFiles.forEach(filename => {
+        const option = document.createElement('option');
+        option.value = filename;
+        option.textContent = filename;
+        select.appendChild(option);
+      });
+      
+      addBotMessage(`Found ${pdfFiles.length} PDF files. Select one to begin.`);
+    } else {
+      addBotMessage("No PDFs found. Please upload one first.");
+    }
+  } catch (error) {
+    console.error('Error loading PDF list:', error);
+    addBotMessage("Error loading PDF list. Please check server connection.");
+  }
+}
+
+function changePDF(select) {
+  const filename = select.value;
+  const pdfViewer = document.getElementById("pdfViewer");
+  const chatInput = document.getElementById("chatInput");
+  const sendButton = document.getElementById("sendButton");
+  
+  currentPDF = filename;
+  
+  if (filename) {
+    // Properly encode filename for URL
+    const encodedFilename = encodeURIComponent(filename);
+    pdfViewer.src = `/static/pdfs/${encodedFilename}`;
+    chatInput.disabled = false;
+    sendButton.disabled = false;
+    chatInput.placeholder = "Ask me anything about the PDF document...";
+    
+    // Clear chat history when switching PDFs
+    clearChatHistory();
+    
+    // Notify backend about the PDF change
+    updateBackendPDF(filename);
+    
+    addBotMessage(`Perfect! I've loaded "${filename}". The document is now available for viewing on the left. Feel free to ask me any questions about its content, structure, or specific sections.`);
+  } else {
+    pdfViewer.src = "";
+    chatInput.disabled = true;
+    sendButton.disabled = true;
+    chatInput.placeholder = "Please select a PDF first...";
+    clearChatHistory();
+    addBotMessage("Please select a PDF document to continue our conversation.");
+  }
+}
+
+function handleKeyPress(event) {
+  if (event.key === 'Enter' && !event.shiftKey && !isLoading) {
+    event.preventDefault();
+    sendMessage();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  
+  if (!message || isLoading) return;
+  
+  if (!currentPDF) {
+    addBotMessage("Please select a PDF document first before asking questions.");
+    return;
+  }
+  
+  // Add user message
+  addUserMessage(message);
+  
+  // Clear input
+  input.value = '';
+  
+  // Show loading indicator
+  showLoading();
+  
+  try {
+    // Make API call to your backend
+    const response = await fetch('http://localhost:7860/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message,
+        pdf_name: currentPDF,
+        history: chatHistory
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    hideLoading();
+    addBotMessage(data.response || data.answer || "I received your message but couldn't generate a response.");
+    
+  } catch (error) {
+    console.error('Error calling chat API:', error);
+    hideLoading();
+    addBotMessage(`Error: ${error.message || "Couldn't process your request"}`);
+  }
+}
+
+function addUserMessage(message) {
+  const chatMessages = document.getElementById('chatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message user-message';
+  messageDiv.innerHTML = `
+    <div class="message-label">You</div>
+    <div class="message-content">${escapeHtml(message)}</div>
+  `;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  chatHistory.push({type: 'user', message: message});
+}
+
+function addBotMessage(message) {
+  const chatMessages = document.getElementById('chatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message bot-message';
+  messageDiv.innerHTML = `
+    <div class="message-label">AI Assistant</div>
+    <div class="message-content">${escapeHtml(message)}</div>
+  `;
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  chatHistory.push({type: 'bot', message: message});
+}
+
+// Simple HTML escaping for security
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function showLoading() {
+  isLoading = true;
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const sendButton = document.getElementById('sendButton');
+  const chatInput = document.getElementById('chatInput');
+  
+  loadingIndicator.style.display = 'flex';
+  sendButton.disabled = true;
+  chatInput.disabled = true;
+}
+
+function clearChatHistory() {
+  const chatMessages = document.getElementById('chatMessages');
+  chatMessages.innerHTML = '';
+  chatHistory = [];
+  
+  // Add initial welcome message
+  addBotMessage(`I've loaded "${currentPDF}". Ask me anything about this document!`);
+}
+
+function hideLoading() {
+  isLoading = false;
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const sendButton = document.getElementById('sendButton');
+  const chatInput = document.getElementById('chatInput');
+  
+  loadingIndicator.style.display = 'none';
+  sendButton.disabled = false;
+  chatInput.disabled = false;
+}
+
+// PDF filename change handler - updates the backend about current PDF
+async function updateBackendPDF(pdfFilename) {
+  try {
+    await fetch('http://localhost:7860/set_pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        pdf_name: pdfFilename
+      })
+    });
+  } catch (error) {
+    console.warn('Could not update backend PDF:', error);
+  }
+}
+
+// Initialize the application
+window.onload = function() {
+  // Start with disabled input until PDF is selected
+  const chatInput = document.getElementById('chatInput');
+  const sendButton = document.getElementById('sendButton');
+  chatInput.disabled = true;
+  sendButton.disabled = true;
+  
+  // Load available PDFs
+  loadPDFList();
+};
+</script>
+</body>
+</html>
