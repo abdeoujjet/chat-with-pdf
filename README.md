@@ -120,5 +120,5 @@ MODEL = "gemma3:4b"  # Replace with another supported Ollama model if desired
 
 Crafted by Abde Oujjet Moumen with care and precision.
 
-[LinkedIn Profile](https://www.linkedin.com/in/abde-oujjet-moumen/)
+[LinkedIn Profile](https://www.linkedin.com/in/abde-oujjet-moumen-962402143?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
 ```
