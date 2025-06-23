@@ -5,6 +5,7 @@ env
 *.ipynb
 
 # other
+/static/index_old.html
 __pycache__
 ChatVectors
 vectorstores
