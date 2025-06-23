@@ -8,13 +8,14 @@ interface with the PDF on one side and the chatbot on the other, enabling engagi
 
 
 ---
-![Screenshot_3](https://github.com/user-attachments/assets/0f34fca1-40a4-434d-a88c-70878dd9bd95)
+![Screenshot_3](https://github.com/user-attachments/assets/0f34fca1-40a4-434d-a88c-70878dd9bd95)---
+---
 ![Screenshot_2](https://github.com/user-attachments/assets/058b8a8f-8a31-4518-87eb-b9e6adbec697)
 ---
 
 ## What Does This Project Do?
 
-- **Loads PDFs** from a local folder
+- **Loads PDFs** automatically from a local folder
 - **Extracts and Chunks Text** from each PDF
 - **Creates Embeddings** using `sentence-transformers/all-MiniLM-L6-v2`
 - **Stores Vectors** in a persistent ChromaDB store
@@ -36,13 +37,18 @@ pip install -r requirements.txt
 
 ```
 .
-├── pdfs/          # Folder for PDF documents
+├── static/          # Folder for PDF documents
+├──── index.html     # Web interface
+├──── pdfs/          # Folder for PDF documents
 ├── vectorstores/  # Auto-generated ChromaDB stores
+├── ChatVectors/   # Auto-generated store of vectors to speed the setup
 ├── app.py         # Main Gradio server script
-├── index.html     # Web interface
+├── requirements.txt 
 ├── config.py      # Configuration settings
-├── generate_index_html.py  # Updates the PDF dropdown menu
-└── README.md      # Project documentation
+├── generate_index_html.py  # Generates the html (not necessary)
+├── Dockerfile
+├── docker-compose.yml
+└── README.md   # Project documentation
 ```
 
 ### Configuration
@@ -68,20 +74,10 @@ Place your PDF files into the `pdfs/` folder.
 
    The server starts at `http://localhost:7860`. Open `index.html` in your browser:
 
-   ```bash
-   # macOS
-   open index.html
-
-   # Linux
-   xdg-open index.html
-
-   # Windows
-   start index.html
-   ```
 
 3. **Interact with the Chatbot:**
 
-   Select a PDF, wait for processing (initial load may take longer), and start chatting!
+   Select a PDF, wait for processing (the firs time initial load may take longer), and start chatting!
 
 ## Adding New PDFs
 
@@ -121,4 +117,3 @@ MODEL = "gemma3:4b"  # Replace with another supported Ollama model if desired
 Crafted by Abde Oujjet Moumen with care and precision.
 
 [LinkedIn Profile](https://www.linkedin.com/in/abde-oujjet-moumen-962402143?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
-```
