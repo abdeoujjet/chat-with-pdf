@@ -8,9 +8,9 @@ interface with the PDF on one side and the chatbot on the other, enabling engagi
 
 
 ---
-![Screenshot_3](https://github.com/user-attachments/assets/0f34fca1-40a4-434d-a88c-70878dd9bd95)---
+![Screenshot_3](https://github.com/user-attachments/assets/0f34fca1-40a4-434d-a88c-70878dd9bd95)
 
-
+---
 ![Screenshot_2](https://github.com/user-attachments/assets/058b8a8f-8a31-4518-87eb-b9e6adbec697)
 ---
 
