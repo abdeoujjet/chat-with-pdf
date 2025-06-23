@@ -9,7 +9,6 @@ interface with the PDF on one side and the chatbot on the other, enabling engagi
 
 ---
 ![Screenshot_3](https://github.com/user-attachments/assets/0f34fca1-40a4-434d-a88c-70878dd9bd95)
-
 ---
 ![Screenshot_2](https://github.com/user-attachments/assets/058b8a8f-8a31-4518-87eb-b9e6adbec697)
 ---
@@ -118,3 +117,4 @@ MODEL = "gemma3:4b"  # Replace with another supported Ollama model if desired
 Crafted by Abde Oujjet Moumen with care and precision.
 
 [LinkedIn Profile](https://www.linkedin.com/in/abde-oujjet-moumen-962402143?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
+
